@@ -269,6 +269,7 @@ function viewStyle() {
     refresh.style.display = "inline";
     addWord.style.display = "inline";
     resign.style.display = "inline";
+    viewTypeWords.style.display = "inline";
     hanged();
 }
 function hanged() {
