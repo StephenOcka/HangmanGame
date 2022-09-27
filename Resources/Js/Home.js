@@ -503,7 +503,6 @@ function verifyWin(letterPress, word) {
         Swal.fire({
             icon: 'success',
             title: 'Felicidades! Has ganado!',
-            text: '(despues de cerrar este mensaje, claro...)',
             heightAuto: false,
             background: color.grey,
             color: color.black,
