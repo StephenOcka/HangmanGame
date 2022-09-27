@@ -57,7 +57,9 @@ let positionX = 0,
     maxAttempts = 7,
     letterPress = [],
     verifyGameOver=false,
-    typeWord;
+    typeWord,
+    showInformation = true,
+    userOrDefaultWord;
 /*Changes Colors*/
 function view() {
     change = change ? false : true;
@@ -82,11 +84,12 @@ function resetVariables() {
     positionY = 0;
     heightPorcent = heightPorcentDeft;
     actualLetter ="";
-    word="";
+    word = ""
     letterPress = [];
     attempts = 0;
     verifyGameOver=false;
-    dontWord.textContent = ""
+    dontWord.textContent = "";
+    resign.disabled = false;
 }
 /*Author*/
 function authorShow() {
@@ -101,6 +104,19 @@ function authorShow() {
             popup: "animate__animated animate__fadeOutUp"
         }
     })
+}
+/*Instruction*/
+function information() {
+    Swal.fire({
+        icon: 'info',
+        title: 'Presiona una tecla para jugar',
+        text: '(despues de cerrar este mensaje, claro...)',
+        heightAuto: false,
+        background: color.grey,
+        color: color.black,
+        confirmButtonColor: "deepskyblue"
+      })
+      showInformation = false;
 }
 /*Select Type Word*/
 async function requestVerifyWord() {
@@ -148,8 +164,8 @@ async function selectTypeWord() {
 /*verify User Words*/
 async function verifiWord() {
     try {
-        const addWord = await requestAddWord();
-        const beforeVerify = await beforeVerifyWord(addWord);
+        const aggregateWord = await requestAddWord();
+        const beforeVerify = await beforeVerifyWord(aggregateWord);
         if (userWords.length != 0 && beforeVerify && verificated) {
             play();
         }
@@ -158,7 +174,7 @@ async function verifiWord() {
     }
 }
 async function requestAddWord() {
-    const addWord = await Swal.fire({
+    const aggregateWord = await Swal.fire({
         heightAuto: false,
         title: "Agrega tu palabra",
         input: "text",
@@ -183,10 +199,10 @@ async function requestAddWord() {
             }
         }
     })
-    if (addWord.isConfirmed && addWord.value != "") {
+    if (aggregateWord.isConfirmed) {
         verificated = true;
         confirmedAddWord();
-        return addWord.value;
+        return aggregateWord.value;
     } else {
         verificated = false;
     }
@@ -205,7 +221,7 @@ function confirmedAddWord(){
 }
 function character(e) {
     let key = (document.all) ? e.keyCode : e.which,
-        letter = /[A-Za-z0-9]/,
+        letter = /[A-Za-z]/,
         keyPress = String.fromCharCode(key);
     return letter.test(keyPress) ? uperCase(e, key) : false;
 }
@@ -219,9 +235,9 @@ function uperCase(e, key) {
         e.preventDefault();
     }
 }
-function beforeVerifyWord(addWord) {
+function beforeVerifyWord(aggregateWord) {
     try {
-        userWords.push(addWord);
+        userWords.push(aggregateWord);
         userWords = userWords.filter((item) => item !== undefined);
         return true;
     } catch (e) {
@@ -230,6 +246,9 @@ function beforeVerifyWord(addWord) {
 }
 /*Play*/
 function play() {
+    if (showInformation){
+        information();
+    }
     restartImgCanvas();
     resetVariables();
     viewStyle();
@@ -283,7 +302,8 @@ function wordSection() {
     }
 }
 function generateWord() {
-    const words = typeWord ? userWords : defaultWords;
+    words = verificated ? userWords : defaultWords;
+    userOrDefaultWord = verificated ? "user" : "default";
     if (words.length > 0) {
         let wordGenerate = words[Math.floor(Math.random() * words.length)].toUpperCase();
         word = wordGenerate;
@@ -302,7 +322,7 @@ function listen() {
             let keyValue = e.key;
             keyValue = keyValue.toUpperCase();
             let search = word.indexOf(keyValue);
-            if ((e.which > 47 &&  e.which < 90) || (e.which > 96 && e.which < 105)) {
+            if ((e.which > 64 &&  e.which < 91)) {
                 e.stopImmediatePropagation();
                 if (search >= 0) {
                     for (let i = 0; i < word.length; i++) {
@@ -314,6 +334,7 @@ function listen() {
                                 letterPress.push(keyValue);
                             }
                             colorLetter(actualLetter, color.black, color.green, 2000);
+                            verifyWin(letterPress, word);
                         }
                     }
                 }
@@ -465,4 +486,39 @@ function viewDontWord(letter) {
 }
 function viewTrys() {
     return `Intentos: ${maxAttempts - attempts}`;
+}
+/*Verificated Win*/
+function verifyWin(letterPress, word) {
+    let confirmation = true;
+    for (let i = 0; i < word.length; i++)
+    {
+        if (letterPress.indexOf(word[i]) < 0) {
+            confirmation = false;
+            break;
+        }
+    }
+    if (confirmation)
+    {
+        Swal.fire({
+            icon: 'success',
+            title: 'Felicidades! Has ganado!',
+            text: '(despues de cerrar este mensaje, claro...)',
+            heightAuto: false,
+            background: color.grey,
+            color: color.black,
+            confirmButtonColor: "green"
+          })
+          resign.disabled = true;
+    }
+}
+/*Change Type Word*/
+function changeTypeWord() {
+    if (userOrDefaultWord == "user") {
+        verificated = false;
+        play();
+    } else {
+        verificated = true;
+        play();
+    }
+    
 }
