@@ -9,6 +9,9 @@
         <link rel="stylesheet" href="../Styles/Home.css">
         <link rel="stylesheet" href="../Styles/SweetAlert2.css">
         <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Nabla&display=swap" rel="stylesheet">
         <script src="../Js/SweetAlert2.js"></script>
         <title>Home</title>
     </head>
@@ -23,16 +26,20 @@
             <button id="add" class="button" onclick="verifiWord()"><span class="text">Agregar Palabra</span></button>
             </div>
             <div>
+                <section id="trySection"></section>
                 <section>
                     <canvas id="canvas" class="canvas"></canvas>
                     <img src="../Img/Hanged.png" alt="" class="imgCanvas">
                 </section>
                 <section id="wordSection"></section>
                 <section>
-                    <label id=""for=""></label>
+                    <label id="gameOver" class="gameOver">Game Over</label>
+                    <abbr title="Cambiar conjunto palabras"><button id="viewTypeWord" class="viewTypeWord" onclick="requestVerifyWord()"></button></abbr>
                     <abbr title="Otra palabra"><button id="refresh" class="refresh" onclick="refreshGame()"></button></abbr>
                     <abbr title="Agregar palabra"><button id="addWord" class="addWord" onclick="verifiWord()"></button></abbr>
                     <abbr title="Resignarse"><button id="resign" class="resign" onclick="resignGame()"></button></abbr>
+                    <label id="dontWord"></label>
+                    <label id="viewTry"></label>
                 </section>
             </div>
         </section>

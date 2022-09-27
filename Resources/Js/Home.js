@@ -13,7 +13,12 @@ const body = document.body,
     addWord = document.getElementById("addWord"),
     resign = document.getElementById("resign"),
     conteiner = document.getElementById("wordSection"),
-    author = document.getElementById("author");
+    conteinerAttempt = document.getElementById("trySection"),
+    author = document.getElementById("author"),
+    gameOver = document.getElementById("gameOver"),
+    dontWord = document.getElementById("dontWord"),
+    viewAttempts = document.getElementById("viewTry"),
+    viewTypeWords = document.getElementById("viewTypeWord");
 const color = {
     day: "#E8EAEE",
     dayHigh: "#E5E5E5",
@@ -22,7 +27,8 @@ const color = {
     nightLight: "#CCC",
     grey: "#DDD",
     black: "#000",
-    green: "#0F0"
+    green: "#0F0",
+    red: "#F00"
     },
     img = {
         ChangeView: ["url(../Img/Day.png)", "url(../Img/Night.png)"],
@@ -30,7 +36,8 @@ const color = {
         Refresh: ["url(../Img/RetryDay.png)", "url(../Img/RetryNight.png)"],
         Author: ["url(../Img/AuthorDay.png)", "url(../Img/AuthorNight.png)"],
         AddWord: ["url(../Img/addWordDay.png)", "url(../Img/addWordNight.png)"],
-        Hanged: ["url(../Img/Hanged.png)","url(../Img/HangedGameOver.png)"]
+        Hanged: ["url(../Img/Hanged.png)","url(../Img/HangedGameOver.png)"],
+        Attempt: ["url(../Img/ErrorAttempt.png)"]
     },
     varCss = {
         btns: ["--colorButton", "--colorButtonBorder"],
@@ -46,18 +53,11 @@ let positionX = 0,
     change = true,
     userWords = [],
     verificated,
-    attempts,
-    letterPress = [];
-/*Reset Variables*/
-function resetVariables() {
-    positionX = 0,
-    positionY = 0,
-    heightPorcent = heightPorcentDeft,
-    actualLetter ="",
-    word="",
-    change = true,
-    letterPress = [];
-}
+    attempts = 0,
+    maxAttempts = 7,
+    letterPress = [],
+    verifyGameOver=false,
+    typeWord;
 /*Changes Colors*/
 function view() {
     change = change ? false : true;
@@ -75,6 +75,18 @@ function view() {
     canvas.style.backgroundColor = change ? color.day : color.nightLight;
     drwSuperior();
     changeColorText();
+}
+/*Reset Variables*/
+function resetVariables() {
+    positionX = 0;
+    positionY = 0;
+    heightPorcent = heightPorcentDeft;
+    actualLetter ="";
+    word="";
+    letterPress = [];
+    attempts = 0;
+    verifyGameOver=false;
+    dontWord.textContent = ""
 }
 /*Author*/
 function authorShow() {
@@ -94,7 +106,8 @@ function authorShow() {
 async function requestVerifyWord() {
     try {
         resetVariables();
-        const typeWord = await selectTypeWord();
+        typeWord = await selectTypeWord();
+        console.log(typeWord)
         return typeWord ? verifiWord() : play();
     } catch (e) {
         console.log(e);
@@ -117,6 +130,7 @@ async function selectTypeWord() {
         heightAuto: false,
         allowOutsideClick: false,
         allowEscapeKey: false,
+        confirmButtonColor: "deeppink",
         input: "radio",
         inputOptions: inputOptions,
         inputAttributes: {
@@ -217,8 +231,10 @@ function beforeVerifyWord(addWord) {
 /*Play*/
 function play() {
     restartImgCanvas();
+    resetVariables();
     viewStyle();
     wordSection();
+    trySection();
     listen();
 }
 function restartImgCanvas() {
@@ -233,6 +249,7 @@ function viewStyle() {
     refresh.style.display = "inline";
     addWord.style.display = "inline";
     resign.style.display = "inline";
+    viewTypeWords.style.display = "inline";
     hanged();
 }
 function hanged() {
@@ -266,7 +283,7 @@ function wordSection() {
     }
 }
 function generateWord() {
-    const words = verificated ? userWords : defaultWords;
+    const words = typeWord ? userWords : defaultWords;
     if (words.length > 0) {
         let wordGenerate = words[Math.floor(Math.random() * words.length)].toUpperCase();
         word = wordGenerate;
@@ -279,62 +296,80 @@ function removeAllChildNodes(parent) {
 }
 function listen() {
     document.addEventListener('keydown', (e) => {
-        let keyValue = e.key;
-        keyValue = keyValue.toUpperCase();
-        let search = word.indexOf(keyValue);
-        if ((e.which > 47 &&  e.which < 90) || (e.which > 96 && e.which < 105)) {
-            e.stopImmediatePropagation();
-            if (search >= 0) {
-                for (let i = 0; i < word.length; i++) {
-                     let child = word[i];
-                    if (child == keyValue) {
-                        conteiner.childNodes[i].nodeValue = child;
-                        actualLetter = conteiner.childNodes[i];
-                        if (letterPress.indexOf(keyValue) < 0) {
-                            letterPress.push(keyValue);
+        if(verifyGameOver || attempts >= maxAttempts){
+            return false;
+        } else {
+            let keyValue = e.key;
+            keyValue = keyValue.toUpperCase();
+            let search = word.indexOf(keyValue);
+            if ((e.which > 47 &&  e.which < 90) || (e.which > 96 && e.which < 105)) {
+                e.stopImmediatePropagation();
+                if (search >= 0) {
+                    for (let i = 0; i < word.length; i++) {
+                        let child = word[i];
+                        if (child == keyValue) {
+                            conteiner.childNodes[i].nodeValue = child;
+                            actualLetter = conteiner.childNodes[i];
+                            if (letterPress.indexOf(keyValue) < 0) {
+                                letterPress.push(keyValue);
+                            }
+                            colorLetter(actualLetter, color.black, color.green, 2000);
                         }
-                        colorLetter(actualLetter, color.black, color.green, 2000);
                     }
                 }
-            }
-            if (search < 0) {
-                let canvasWidth = screen.width,
-                    canvasHeight = screen.height;
-                clearCanvas(positionX, positionY, canvasWidth, canvasHeight, heightPorcent, 0, 4, 0, screen, draw, 20, 5, 60);
-                positionY = (heightPorcent * canvasHeight) + 2.5;
-                heightPorcent += heightPorcentDeft;
+                if ((search < 0) && (dontWord.textContent.indexOf(keyValue) < 0)) {
+                    let canvasWidth = screen.width,
+                        canvasHeight = screen.height,
+                        radius = 7;
+                    clearCanvas(positionX, positionY, canvasWidth, canvasHeight, heightPorcent, draw, radius);
+                    positionY = (heightPorcent * canvasHeight) + 2.5;
+                    heightPorcent += heightPorcentDeft;
+                    errorAttempt();
+                    viewDontWord(keyValue);
+                } else if(dontWord.textContent.indexOf(keyValue) >= 0){
+                    console.log(dontWord)
+                    console.log(dontWord.textContent)
+                    Swal.fire({
+                        heightAuto: false,
+                        title: `La letra '${keyValue}' ya la probaste y no está.`,
+                        background: color.grey,
+                        color: color.black,
+                        confirmButtonColor: "Orange"
+                    });
+                }
             }
         }
     }, false);
 }
-function colorLetter(parameter, colorText,colorBg, intervalMs) {
+function colorLetter(parameter, colorText, colorBg, intervalMs) {
     parameter.style.color = colorText;
     parameter.style.backgroundColor = colorBg;
     setTimeout(() => { changeColorText() }, intervalMs);
 }
-function clearCanvas(posX, posY, maxWidth, maxHeight, heightPorcent, interval, increment, count, canvas, context, wCircle, hCircle, radius) {
+function clearCanvas(posX, posY, maxWidth, maxHeight, heightPorcent, context, radius) {
     heightPorcent = (heightPorcent * maxHeight);
+    let increment = (0.8 * radius);
     let m = setInterval(() => {
         if (posY > maxHeight) {
             clearInterval(m);
-            canvas.style.backgroundImage = "url(../Img/HangedGameOver.png)";
+            finishGame();
         }
-        for (count = 0; count < 1; count++) {
+        for (let count = 0; count < 1; count++) {
             if (posY > heightPorcent) {
                 clearInterval(m);
                 break;
             }
-            clearCircle(context, posX, posY, wCircle, hCircle, radius)
+            clearCircle(context, posX, posY, radius)
             posX = posX + increment;
             if (posX > maxWidth) {
                 increment = increment * (-1);
-                posY = posY + (radius*0.9);
+                posY = posY + (0.9 * radius);
             } else if (posX < 0) {
                 increment = increment * (-1);
-                posY = posY + (radius*0.9);
+                posY = posY + (0.9 * radius);
             }
         }
-    }, interval);
+    }, 0);
 }
 function clearCircle(context, x, y, radius) {
     context.save();
@@ -345,7 +380,7 @@ function clearCircle(context, x, y, radius) {
     context.restore();
 }
 function changeColorText() {
-    let i, j, pV, lP;
+    let i, j, pV, lP, parameter;
     let border = change ? color.nightHigh : color.dayHigh,
         text = change ? color.nightHigh : color.dayHigh,
         bg = change ? color.day : color.night;
@@ -367,11 +402,67 @@ function refreshGame() {
     positionX = 0;
     positionY = 0;
     heightPorcent = heightPorcentDeft;
+    gameOver.style.display = "none"
     drwSuperior();
     play();
 }
-/*------------------------------------------------------*/
 /*Resign*/
 function resignGame() {
-
+    clearCanvas(positionX, positionY, screen.width, screen.height, 1, draw, screen.width);
+}
+/*Game Over*/
+function finishGame() {
+    canvas.style.backgroundImage = "url(../Img/HangedGameOver.png)";
+    gameOver.style.display = "inline"
+    viewMissingLetters();
+    verifyGameOver = true;
+}
+function viewMissingLetters() {
+    for(let i = 0; i < word.length; i++) {
+        let search = letterPress.indexOf(word[i]);
+        actualLetter = conteiner.childNodes[i];
+        if (search < 0) {
+            colorLetter(actualLetter, color.black, color.red, 2000);
+        }
+    }
+}
+/*Attempts*/
+function trySection() {
+    if (conteinerAttempt.length != 0) {
+        removeAllChildNodes(conteinerAttempt);
+    }
+    for (let x = 1; x <= maxAttempts; x++) {
+        let newElement = document.createElement("input");
+        with (newElement) {
+            type = "button"
+            className = "attempt";
+        }
+        conteinerAttempt.appendChild(newElement);
+    }
+}
+function errorAttempt() {
+    parameter = conteinerAttempt.childNodes[attempts];
+    parameter.style.backgroundImage = img.Attempt[0];
+    attempts += 1;
+    viewAttempts.textContent = viewTrys();
+    if(maxAttempts - attempts > 4) {
+        viewAttempts.style.color= "#5D5";
+    } else if (maxAttempts - attempts > 2) {
+        viewAttempts.style.color= "#FA4";
+    } else if (maxAttempts - attempts > 0) {
+        viewAttempts.style.color= "#F00";
+    } else {
+        viewAttempts.style.color= "#000";
+    }
+}
+function viewDontWord(letter) {
+    console.log(dontWord)
+    if (dontWord.textContent  == "") {
+        dontWord.innerHTML = letter;
+    } else {
+        dontWord.innerHTML += "<br>" + letter;
+    }
+}
+function viewTrys() {
+    return `Intentos: ${maxAttempts - attempts}`;
 }
