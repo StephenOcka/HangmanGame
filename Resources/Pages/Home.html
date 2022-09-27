@@ -4,9 +4,41 @@
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" href="../Img/LogoAlura.ico">
+        <link rel="stylesheet" href="../Styles/Reset.css">
+        <link rel="stylesheet" href="../Styles/Home.css">
+        <link rel="stylesheet" href="../Styles/SweetAlert2.css">
+        <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+        <script src="../Js/SweetAlert2.js"></script>
         <title>Home</title>
     </head>
     <body>
-        Hola
+        <img id="alura" class="alura" src="../Img/LogoAlura.png" alt="LogoAlura">
+        <section>
+            <abbr title="Tema Claro/Oscuro"><button id="changeView" class="changeView" onclick="view()"></abbr>
+        </section>
+        <section class="main">
+            <div>
+                <button id="init" class="button" onclick="requestVerifyWord()"><span class="text">Iniciar Juego</span></button>
+            <button id="add" class="button" onclick="verifiWord()"><span class="text">Agregar Palabra</span></button>
+            </div>
+            <div>
+                <section>
+                    <canvas id="canvas" class="canvas"></canvas>
+                    <img src="../Img/Hanged.png" alt="" class="imgCanvas">
+                </section>
+                <section id="wordSection"></section>
+                <section>
+                    <label id=""for=""></label>
+                    <abbr title="Otra palabra"><button id="refresh" class="refresh" onclick="refreshGame()"></button></abbr>
+                    <abbr title="Agregar palabra"><button id="addWord" class="addWord" onclick="verifiWord()"></button></abbr>
+                    <abbr title="Resignarse"><button id="resign" class="resign" onclick="resignGame()"></button></abbr>
+                </section>
+            </div>
+        </section>
+        <section>
+            <abbr title="Autor"><button id="author" class="button" onclick="authorShow()"></button></abbr>
+        </section>
     </body>
 </html>
+<script src="../Js/Home.js"></script>
