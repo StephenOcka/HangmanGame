@@ -90,6 +90,7 @@ function resetVariables() {
     verifyGameOver=false;
     dontWord.textContent = "";
     resign.disabled = false;
+    viewAttempts.style.display = "none";
 }
 /*Author*/
 function authorShow() {
@@ -268,7 +269,6 @@ function viewStyle() {
     refresh.style.display = "inline";
     addWord.style.display = "inline";
     resign.style.display = "inline";
-    viewTypeWords.style.display = "inline";
     hanged();
 }
 function hanged() {
@@ -462,6 +462,7 @@ function trySection() {
     }
 }
 function errorAttempt() {
+    viewAttempts.style.display = "inline"
     parameter = conteinerAttempt.childNodes[attempts];
     parameter.style.backgroundImage = img.Attempt[0];
     attempts += 1;
